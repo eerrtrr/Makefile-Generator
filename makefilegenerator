@@ -1,0 +1,156 @@
+#!/bin/bash
+
+#This script will take the list of folder that you want to add into a makefile
+#Accept parameter : 
+
+
+sortFile(){
+	for file in "$@";
+       	do
+                if [[ $file == *".c" ]]; then
+                        echo "Add $file to source"
+			SOURCE+=("${file}")
+                        
+			echo "Create associated object file"
+			OBJS+=("${file//.c/.o}")
+			echo ""
+	
+		elif [[ $file == *".h" ]]; then			
+                        echo "Add $file to header"
+                        HEADER+=("${file}")
+			echo ""
+
+                elif [[ $file == "-"* ]]; then
+                        echo "Add $file to library"
+                        LFLAGS+=("${file}")
+			echo ""
+
+		else
+			echo "$file format not recognized"
+			echo ""
+
+                fi
+        done
+}
+
+
+Help(){
+   # Display Help
+   echo "Makefile generator is a free bash script to create quick and clear makefile"
+   echo
+   echo "Syntax: files... -library"
+   echo "Fill files section with all the files you need to add to the makefile. Use * if you want."
+   echo "Use -lib to add library"
+   echo ""
+   echo "options:"
+   echo "g     Print the GPL license notification."
+   echo "h     Print this Help."
+   echo "v     Print software version and exit."
+   echo
+}
+
+
+clear
+
+
+# Get the options
+while getopts ":hgv" option; do
+   case $option in
+	h) 	
+		Help
+		exit;;
+		
+	g)
+		echo "GPL licence coming"
+		exit;;
+		
+	v)
+		echo "Makefilegenerator V1"
+		exit;;
+
+	\?)
+		echo "Error: Invalid option"
+		exit;;
+   esac
+done
+
+
+
+#VAR
+index=0
+OBJS=()
+SOURCE=()
+HEADER=()  
+OUT="run"
+CC="gcc"
+FLAGS=(-g -c -Wall -std=c11)
+LFLAGS=()
+
+
+
+#CREATE MAKEFILE FILE AND CHECK IF OK
+echo "" > makefile
+
+if [ -e makefile ]; then
+	echo "Makefile created"
+
+else
+	echo "A problem occured while creating makefile"
+	exit
+fi
+
+
+echo ""
+echo "Generating makefile...."
+echo ""
+echo ""
+
+
+sortFile $@
+
+
+echo ""
+echo ""
+
+echo "OBJS   = ${OBJS[@]}" |tee makefile
+echo "SOURCE = ${SOURCE[@]}" |tee -a makefile
+echo "HEADER = ${HEADER[@]}" |tee -a makefile
+echo "OUT    = $OUT" |tee -a makefile
+echo "CC     = $CC" |tee -a makefile
+echo "FLAGS  = ${FLAGS[@]}" |tee -a makefile
+echo "LFLAGS = ${LFLAGS[@]}" |tee -a makefile
+
+
+
+
+
+echo ""
+echo ""
+echo "------------------------------------"
+echo ""
+echo ""
+
+
+echo "" >>  makefile
+echo "" >>  makefile
+echo "" >> makefile
+ 
+ 
+
+echo 'all: $(OBJS)' |tee -a makefile
+echo -e "\t"'$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)' |tee -a makefile
+echo "" >> makefile
+echo "" >> makefile
+echo ""
+
+
+
+for i in "${!OBJS[@]}";
+do
+	echo "${OBJS[$i]}: ${SOURCE[$i]}" |tee -a makefile
+	echo -e "\t"'$(CC) $(FLAGS)' ${SOURCE[$i]}|tee -a makefile
+	echo ""
+	echo "" >> makefile
+	echo "" >> makefile
+done
+
