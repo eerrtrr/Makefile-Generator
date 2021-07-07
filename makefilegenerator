@@ -65,7 +65,7 @@ while getopts ":hgv" option; do
 		exit;;
 		
 	v)
-		echo "Makefilegenerator V1"
+		echo "Makefilegenerator V2"
 		exit;;
 
 	\?)
@@ -154,3 +154,20 @@ do
 	echo "" >> makefile
 done
 
+
+
+echo "run:" |tee -a makefile
+echo -e "\tmake clean" |tee -a makefile
+echo -e "\tmake" |tee -a makefile
+echo -e "\trm *.o" |tee -a makefile
+echo -e "\t./run" |tee -a makefile
+echo "" >> makefile
+echo "" >> makefile
+echo ""
+
+
+echo "clean:" |tee -a makefile
+echo -e "\trm -rf *.o ||:" |tee -a makefile
+echo -e "\trm -rf run ||:" |tee -a makefile
+echo ""
+echo ""
